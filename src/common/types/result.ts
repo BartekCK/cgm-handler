@@ -25,6 +25,10 @@ export abstract class SuccessResult<T> extends Result {
     public getData(): T {
         return this.data;
     }
+
+    public isSuccess(): this is SuccessResult<T> {
+        return this.success === true;
+    }
 }
 
 export abstract class FailureResult<T = any> extends Result {
@@ -53,5 +57,9 @@ export abstract class FailureResult<T = any> extends Result {
             errorCode: this.errorCode,
             errorType: this.errorType,
         };
+    }
+
+    public isFailure(): this is FailureResult {
+        return this.success === false;
     }
 }

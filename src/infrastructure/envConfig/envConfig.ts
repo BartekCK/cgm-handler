@@ -30,7 +30,15 @@ export class EnvConfig implements IEnvConfig {
         this.props = props;
     }
 
-    public static factory(): IEnvConfig {
+    public static async factory(): Promise<IEnvConfig> {
+        if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
+            const { config } = await import('dotenv');
+
+            config({
+                path: process.env['NODE_ENV'] === 'test' ? './.env.test' : undefined,
+            });
+        }
+
         return new EnvConfig();
     }
 

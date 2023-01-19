@@ -2,7 +2,7 @@ import { CgmGlucose } from '../../../domain/entities/cgmGlucose/cgmGlucose';
 import {
     GetLatestReadingSuccess,
     GetLatestReadingSuccessResult,
-    IGlucoseRepository,
+    ICgmGlucoseRepository,
     SaveResult,
     SaveSuccess,
 } from '../../../application/repositories/cgmGlucoseRepository/cgmGlucoseRepository.interface';
@@ -13,7 +13,7 @@ import { ICgmGlucoseDbEntityMapper } from './cgmGlucoseDbEntityMapper.interface'
 
 export const CGM_GLUCOSE_TABLE_NAME = 'cgm_glucose';
 
-export class CgmGlucoseRepository implements IGlucoseRepository {
+export class CgmGlucoseRepository implements ICgmGlucoseRepository {
     constructor(
         private readonly dbClient: IDbClient,
         private readonly cgmGlucoseDbEntityMapper: ICgmGlucoseDbEntityMapper,
@@ -24,7 +24,7 @@ export class CgmGlucoseRepository implements IGlucoseRepository {
             const result = await this.dbClient
                 .select<ICgmGlucoseDbEntity>()
                 .from(CGM_GLUCOSE_TABLE_NAME)
-                .orderBy('valueDate')
+                .orderBy('valueDate', 'desc')
                 .first();
 
             if (!result) {
@@ -48,7 +48,7 @@ export class CgmGlucoseRepository implements IGlucoseRepository {
                 .insert<ICgmGlucoseDbEntity>(dbEntity)
                 .into(CGM_GLUCOSE_TABLE_NAME)
                 .onConflict('id')
-                .merge(['value', 'date', 'trend', 'updatedAt']);
+                .merge(['value', 'valueDate', 'trend', 'updatedAt']);
 
             return new SaveSuccess({ id: glucose.getState().id });
         } catch (error) {

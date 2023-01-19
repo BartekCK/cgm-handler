@@ -9,7 +9,7 @@ export type SaveResult = SaveSuccess | DatabaseFailure;
 export class GetLatestReadingSuccess extends SuccessResult<CgmGlucose | null> {}
 export type GetLatestReadingSuccessResult = GetLatestReadingSuccess | DatabaseFailure;
 
-export interface IGlucoseRepository {
+export interface ICgmGlucoseRepository {
     getLatestReading: () => Promise<GetLatestReadingSuccessResult>;
     save: (glucose: CgmGlucose) => Promise<SaveResult>;
 }
