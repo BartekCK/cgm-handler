@@ -7,7 +7,7 @@ import {
     SaveSuccess,
 } from '../../../application/repositories/cgmGlucoseRepository/cgmGlucoseRepository.interface';
 import { IDbClient } from '../../database/client/dbClient.interface';
-import { CgmGlucoseDbEntityInteface } from './cgmGlucoseDbEntity.inteface';
+import { ICgmGlucoseDbEntity } from './cgmGlucoseDbEntity.interface';
 import { DatabaseFailure } from '../../../common/types/databaseFailure';
 import { ICgmGlucoseDbEntityMapper } from './cgmGlucoseDbEntityMapper.interface';
 
@@ -22,7 +22,7 @@ export class CgmGlucoseRepository implements IGlucoseRepository {
     async getLatestReading(): Promise<GetLatestReadingSuccessResult> {
         try {
             const result = await this.dbClient
-                .select<CgmGlucoseDbEntityInteface>()
+                .select<ICgmGlucoseDbEntity>()
                 .from(CGM_GLUCOSE_TABLE_NAME)
                 .orderBy('valueDate')
                 .first();
@@ -45,7 +45,7 @@ export class CgmGlucoseRepository implements IGlucoseRepository {
                 this.cgmGlucoseDbEntityMapper.mapIntoCgmGlucoseDbEntity(glucose);
 
             await this.dbClient
-                .insert<CgmGlucoseDbEntityInteface>(dbEntity)
+                .insert<ICgmGlucoseDbEntity>(dbEntity)
                 .into(CGM_GLUCOSE_TABLE_NAME)
                 .onConflict('id')
                 .merge(['value', 'date', 'trend', 'updatedAt']);

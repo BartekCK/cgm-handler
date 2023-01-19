@@ -1,7 +1,7 @@
-import { CgmGlucoseDbEntityInteface } from './cgmGlucoseDbEntity.inteface';
+import { ICgmGlucoseDbEntity } from './cgmGlucoseDbEntity.interface';
 import { CgmGlucose } from '../../../domain/entities/cgmGlucose/cgmGlucose';
 
 export interface ICgmGlucoseDbEntityMapper {
-    mapIntoCgmGlucoseEntity: (dbEntity: CgmGlucoseDbEntityInteface) => CgmGlucose;
-    mapIntoCgmGlucoseDbEntity: (dbEntity: CgmGlucose) => CgmGlucoseDbEntityInteface;
+    mapIntoCgmGlucoseEntity: (dbEntity: ICgmGlucoseDbEntity) => CgmGlucose;
+    mapIntoCgmGlucoseDbEntity: (dbEntity: CgmGlucose) => ICgmGlucoseDbEntity;
 }

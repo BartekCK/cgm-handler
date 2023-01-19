@@ -8,6 +8,24 @@ const config: IDbClientEnvConfig = EnvConfig.factory();
 
 const dbClient = new DbClientFactory(config);
 
-export default dbClient.create({
-    migrations: { directory: './src/infrastructure/database/migrations' },
-});
+const [databasePassword, databasePort, databaseHost, databaseName, databaseUser] = [
+    config.getDatabasePassword(),
+    config.getDatabasePort(),
+    config.getDatabaseHost(),
+    config.getDatabaseName(),
+    config.getDatabaseUser(),
+];
+
+export default {
+    client: 'pg',
+    connection: {
+        host: databaseHost,
+        port: databasePort,
+        user: databaseUser,
+        password: databasePassword,
+        database: databaseName,
+    },
+    migrations: {
+        directory: './src/infrastructure/database/migrations',
+    },
+};

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "echo \"Error: no test specified\" && exit 1",
     "build": "rimraf ./dist && tsc",
-    "migrations:create": "knex migrate:make migration_name -x ts",
+    "migrations:create": "knex migrate:make -x ts",
     "migrations:latest": "knex migrate:latest",
     "migrations:up": "knex migrate:up",
     "migrations:down": "knex migrate:down",

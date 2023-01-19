@@ -5,7 +5,7 @@ import { IDbClient } from './dbClient.interface';
 export class DbClientFactory {
     public constructor(private readonly envDatabaseConfig: IDbClientEnvConfig) {}
 
-    public create(config?: Partial<Knex.Config>): IDbClient {
+    public getDatabaseConfig(config?: Partial<Knex.Config>): Knex.Config {
         const [databasePassword, databasePort, databaseHost, databaseName, databaseUser] =
             [
                 this.envDatabaseConfig.getDatabasePassword(),

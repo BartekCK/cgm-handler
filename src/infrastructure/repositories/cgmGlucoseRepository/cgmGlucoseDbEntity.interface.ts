@@ -1,4 +1,4 @@
-export interface CgmGlucoseDbEntityInteface {
+export interface ICgmGlucoseDbEntity {
     id: string;
     value: number | null;
     valueDate: Date;

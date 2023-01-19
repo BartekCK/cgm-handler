@@ -1,4 +1,4 @@
-import { CgmGlucoseDbEntityInteface } from './cgmGlucoseDbEntity.inteface';
+import { ICgmGlucoseDbEntity } from './cgmGlucoseDbEntity.interface';
 import {
     CgmGlucose,
     CgmGlucoseId,
@@ -7,7 +7,7 @@ import {
 import { ICgmGlucoseDbEntityMapper } from './cgmGlucoseDbEntityMapper.interface';
 
 export class CgmGlucoseDbEntityMapper implements ICgmGlucoseDbEntityMapper {
-    public mapIntoCgmGlucoseDbEntity(dbEntity: CgmGlucose): CgmGlucoseDbEntityInteface {
+    public mapIntoCgmGlucoseDbEntity(dbEntity: CgmGlucose): ICgmGlucoseDbEntity {
         const { id, value, valueDate, trend, createdAt } = dbEntity.getState();
         return {
             id,
@@ -19,7 +19,7 @@ export class CgmGlucoseDbEntityMapper implements ICgmGlucoseDbEntityMapper {
         };
     }
 
-    public mapIntoCgmGlucoseEntity(dbEntity: CgmGlucoseDbEntityInteface): CgmGlucose {
+    public mapIntoCgmGlucoseEntity(dbEntity: ICgmGlucoseDbEntity): CgmGlucose {
         return CgmGlucose.createFromState({
             id: dbEntity.id as CgmGlucoseId,
             value: dbEntity.value,
