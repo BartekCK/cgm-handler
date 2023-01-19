@@ -1,4 +1,4 @@
-export interface IEnvDatabaseConfig {
+export interface IDbClientEnvConfig {
     getDatabaseHost: () => string;
     getDatabasePort: () => number;
     getDatabaseUser: () => string;
