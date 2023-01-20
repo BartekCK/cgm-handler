@@ -49,5 +49,5 @@ jobs:
 
     - name: Run test
       env:
-        DATABASE_HOST: postgres
+        DATABASE_HOST: localhost
       run: npm test
