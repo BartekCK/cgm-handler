@@ -12,8 +12,6 @@ export default async () => {
         config.getDatabaseUser(),
     ];
 
-    console.log(config);
-
     return {
         client: 'pg',
         connection: {
