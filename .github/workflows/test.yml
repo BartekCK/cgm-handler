@@ -48,6 +48,4 @@ jobs:
       run: npm run lint
 
     - name: Run test
-      env:
-        DATABASE_HOST: localhost
       run: npm test
