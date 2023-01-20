@@ -18,6 +18,11 @@ jobs:
           POSTGRES_USER: user123
           POSTGRES_PASSWORD: root
           POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     runs-on: ubuntu-latest
 
