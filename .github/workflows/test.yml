@@ -6,14 +6,30 @@ on:
   pull_request:
     branches: [ "develop", "master" ]
 
+
+
+
 jobs:
-  build:
+  test:
+
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - "5432:5432"
+        env_file:
+          - .env.test
+        env:
+          POSTGRES_USER=${DATABASE_USER}
+          POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+          POSTGRES_DB=${DATABASE_NAME}
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [16.x]
+
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
@@ -21,10 +37,10 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-        
+
     - name: Install all dependencies
       run: npm ci
-      
+
     - name: Check typescript types
       run: npm run check-types
 
@@ -32,4 +48,6 @@ jobs:
       run: npm run lint
 
     - name: Run test
+      env:
+        DATABASE_HOST: postgres
       run: npm test
