@@ -55,14 +55,16 @@ jobs:
         run: |
           mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
 
-      - name: Get commit hash
-        run: echo ::set-env name=COMMIT_HASH::$(git rev-parse HEAD)
+      - name: Set environment variable
+        run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       - name: Build Docker image
         run: |
-          IMAGE_TAG=${{ steps.get_commit_hash.outputs.commit_hash }}
+          echo "Building image with tag: $GITHUB_ENV"
           echo "Building image with tag: ${COMMIT_HASH}"
+          IMAGE_TAG=${{ steps.get_commit_hash.outputs.commit_hash }}
           echo "Building image with tag: $IMAGE_TAG"
+        
           docker build -t cgm-handler:$IMAGE_TAG .
 
       - name: Run container
