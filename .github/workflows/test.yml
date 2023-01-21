@@ -57,11 +57,14 @@ jobs:
 
       - name: Set environment variable
         run: echo "COMMIT_HASH=$(git rev-parse HEAD)" >> $GITHUB_ENV
+        env:
+          SH_COMMIT_HASH: ${{  github.sha }}
 
       - name: Build Docker image
         run: |
           echo "Building image with tag: $GITHUB_ENV"
           echo "Building image with tag: ${COMMIT_HASH}"
+          echo "Building image with tag: ${SH_COMMIT_HASH}"
           IMAGE_TAG=${{ steps.get_commit_hash.outputs.commit_hash }}
           echo "Building image with tag: $IMAGE_TAG"
         
