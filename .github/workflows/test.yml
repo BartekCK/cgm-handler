@@ -8,28 +8,24 @@ on:
 
 jobs:
   test:
-
-    #    services:
-    #      postgres:
-    #        image: postgres
-    #        ports:
-    #          - "5432:5432"
-    #        env:
-    #          POSTGRES_USER: user123
-    #          POSTGRES_PASSWORD: root
-    #          POSTGRES_DB: test
-    #        options: >-
-    #          --health-cmd pg_isready
-    #          --health-interval 10s
-    #          --health-timeout 5s
-    #          --health-retries 5
-
+    services:
+      postgres:
+        image: postgres
+        ports:
+          - "5432:5432"
+        env:
+          POSTGRES_USER: user123
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     runs-on: ubuntu-latest
-
     strategy:
       matrix:
         node-version: [16.x]
-
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}
@@ -38,19 +34,20 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      #    - name: Install all dependencies
-      #      run: npm ci
-      #
-      #    - name: Check typescript types
-      #      run: npm run check-types
-      #
-      #    - name: Check lint
-      #      run: npm run lint
-      #
-      #    - name: Run test
-      #      run: npm test
+      - name: Install all dependencies
+        run: npm ci
 
+      - name: Check typescript types
+        run: npm run check-types
 
+      - name: Check lint
+        run: npm run lint
+
+      - name: Run test
+        run: npm test
+
+  test-build:
+    steps:
       - name: Install aws-lambda-runtime-interface-emulator
         run: |
           mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
@@ -71,3 +68,7 @@ jobs:
       - name: Check if image is appropriate for Lambda Container
         run: |
           curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+
+      - name: Clear after pipeline
+        run: |
+          docker container stop cgm-handler-container
