@@ -60,7 +60,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          echo "Building image with tag: ${COMMIT_HASH}"
+          echo "Building image with tag: $COMMIT_HASH"
           docker build -t cgm-handler:$COMMIT_HASH .
 
       - name: Run cgm-handler-container
