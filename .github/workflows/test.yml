@@ -7,8 +7,8 @@ on:
     branches: [ "develop", "master" ]
 
 jobs:
-  test:
 
+  test:
     services:
       postgres:
         image: postgres
@@ -31,21 +31,51 @@ jobs:
         node-version: [16.x]
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
 
-    - name: Install all dependencies
-      run: npm ci
+      - name: Install all dependencies
+        run: npm ci
 
-    - name: Check typescript types
-      run: npm run check-types
+      - name: Check typescript types
+        run: npm run check-types
 
-    - name: Check lint
-      run: npm run lint
+      - name: Check lint
+        run: npm run lint
 
-    - name: Run test
-      run: npm test
+      - name: Run test
+        run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install aws-lambda-runtime-interface-emulator
+        run: |
+          mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
+
+      - name: Set COMMIT_HASH environment variable
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+
+      - name: Build Docker image
+        run: |
+          echo "Building image with tag: $COMMIT_HASH"
+          docker build -t cgm-handler:$COMMIT_HASH .
+
+      - name: Run cgm-handler-container
+        run: |
+          docker run --rm -d -p 9000:8080 --name cgm-handler-container cgm-handler:$COMMIT_HASH
+
+      - name: Check if image is appropriate for Lambda Container
+        run: |
+          curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+
+      - name: Clear after pipeline
+        run: |
+          docker container stop cgm-handler-container
