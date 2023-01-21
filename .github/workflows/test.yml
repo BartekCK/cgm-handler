@@ -64,6 +64,10 @@ jobs:
           echo "Building image with tag: ${COMMIT_HASH}"
           docker build -t cgm-handler:$COMMIT_HASH .
 
-      - name: Run container
+      - name: Run cgm-handler-container
         run: |
-          docker run --rm -it -p 9000:8080 cgm-handler:$COMMIT_HASH
+          docker run --rm -p 9000:8080 --name cgm-handler-container cgm-handler:$COMMIT_HASH
+
+      - name: Check if image is appropriate for Lambda Container
+        run: |
+          curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
