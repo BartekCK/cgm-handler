@@ -66,7 +66,7 @@ jobs:
 
       - name: Run cgm-handler-container
         run: |
-          docker run --rm -p 9000:8080 --name cgm-handler-container cgm-handler:$COMMIT_HASH
+          docker run --rm -d -p 9000:8080 --name cgm-handler-container cgm-handler:$COMMIT_HASH
 
       - name: Check if image is appropriate for Lambda Container
         run: |
