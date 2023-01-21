@@ -7,6 +7,7 @@ on:
     branches: [ "develop", "master" ]
 
 jobs:
+
   test:
     services:
       postgres:
@@ -46,7 +47,8 @@ jobs:
       - name: Run test
         run: npm test
 
-  test-build:
+  build:
+    runs-on: ubuntu-latest
     steps:
       - name: Install aws-lambda-runtime-interface-emulator
         run: |
