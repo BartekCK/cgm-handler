@@ -1,6 +1,7 @@
 import {
     GetLatestReadingSuccessResult,
     ICgmGlucoseRepository,
+    SaveManyResult,
     SaveResult,
 } from '../../../../application/repositories/cgmGlucoseRepository/cgmGlucoseRepository.interface';
 import { CGM_GLUCOSE_TABLE_NAME, CgmGlucoseRepository } from '../cgmGlucoseRepository';
@@ -139,8 +140,46 @@ describe('cgmGlucoseRepository', () => {
                 assertResultSuccess(result);
 
                 expect(latestCgmGlucoseDbEntity).toStrictEqual({
-                    ...result.getData()?.getState(),
+                    ...result.getData().cgmGlucose?.getState(),
                     updatedAt: expect.any(Date),
+                });
+            });
+        });
+    });
+
+    describe('cgmGlucoseRepository.saveMany()', () => {
+        describe('when save first time', () => {
+            const cgmGlucoses = [
+                cgmGlucoseTestFactory(),
+                cgmGlucoseTestFactory(),
+                cgmGlucoseTestFactory(),
+                cgmGlucoseTestFactory(),
+                cgmGlucoseTestFactory(),
+            ];
+
+            let result: SaveManyResult;
+
+            beforeAll(async () => {
+                result = await cgmGlucoseRepository.saveMany(cgmGlucoses);
+            });
+
+            it('then all CgmGlucoses should be persisted', async () => {
+                const dbEntities = await dbClient
+                    .select()
+                    .from(CGM_GLUCOSE_TABLE_NAME)
+                    .whereIn(
+                        'id',
+                        cgmGlucoses.map((g) => g.getState().id),
+                    );
+
+                expect(dbEntities).toHaveLength(cgmGlucoses.length);
+            });
+
+            it('then result should be success with ids', async () => {
+                assertResultSuccess(result);
+
+                expect(result.getData()).toEqual({
+                    ids: cgmGlucoses.map((g) => g.getState().id),
                 });
             });
         });

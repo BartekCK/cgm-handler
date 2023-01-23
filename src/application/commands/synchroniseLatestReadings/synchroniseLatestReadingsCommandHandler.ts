@@ -103,12 +103,10 @@ export class SynchroniseLatestReadingsCommandHandler
                 CgmGlucose.create(dexcomReading),
             );
         } else {
-            const latestDexcomReadings = dexcomReadings
-                .filter(
-                    (dexcomReading) =>
-                        dexcomReading.valueDate > latestCgmGlucose.getState().valueDate,
-                )
-                .sort((a, b) => b.valueDate.getTime() - a.valueDate.getTime());
+            const latestDexcomReadings = dexcomReadings.filter(
+                (dexcomReading) =>
+                    dexcomReading.valueDate > latestCgmGlucose.getState().valueDate,
+            );
 
             createdCgmGlucoseResults = latestDexcomReadings.map((dexcomReading) =>
                 CgmGlucose.create(dexcomReading),
@@ -128,7 +126,10 @@ export class SynchroniseLatestReadingsCommandHandler
         });
 
         const saveManyResult = await this.cgmGlucoseRepository.saveMany(
-            createdCgmGlucoses,
+            createdCgmGlucoses.sort(
+                (a, b) =>
+                    b.getState().valueDate.getTime() - a.getState().valueDate.getTime(),
+            ),
         );
 
         if (saveManyResult.isFailure()) {

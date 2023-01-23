@@ -14,7 +14,7 @@ export const dexcomEntityTestFactory = (
         WT: `Date(${randomDate.getTime()})`,
         ST: `Date(${randomDate.getTime()})`,
         DT: `Date(${randomDate.getTime()}+0100)`,
-        Value: input?.Value || 115,
+        Value: input?.Value || faker.datatype.number({ min: 50, max: 300 }),
         Trend: input?.Trend || 'Flat',
     };
 };
