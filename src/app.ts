@@ -53,6 +53,8 @@ export const lambdaHandler = async (event: Record<string, unknown>) => {
     const command = new SynchroniseLatestReadingsCommand({
         traceId: v4(),
     });
+
+    console.log('BEFORE INVOKE 1');
     const handlerResult = await commandBus.execute<
         SynchroniseLatestReadingsCommand,
         Promise<SynchroniseLatestReadingsCommandHandlerResult>
