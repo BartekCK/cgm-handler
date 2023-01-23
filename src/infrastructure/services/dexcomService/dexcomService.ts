@@ -27,7 +27,7 @@ export class DexcomService implements IDexcomService {
         const { minutesBefore, maxCount } = data;
 
         if (minutesBefore < 1 || minutesBefore > 1440) {
-            new GetReadingsFailure({
+            return new GetReadingsFailure({
                 errorMessage: 'Minutes must be between 1 and 1440',
                 errorCode: 'ARG_ERROR_MINUTES_INVALID',
                 errorType: 'DOMAIN_ERROR',
@@ -38,12 +38,12 @@ export class DexcomService implements IDexcomService {
         }
 
         if (maxCount < 1 || maxCount > 287) {
-            new GetReadingsFailure({
+            return new GetReadingsFailure({
                 errorMessage: 'Max count must be between 1 and 287',
                 errorCode: 'ARG_ERROR_MINUTES_INVALID',
                 errorType: 'DOMAIN_ERROR',
                 context: {
-                    minutesBefore,
+                    maxCount,
                 },
             });
         }

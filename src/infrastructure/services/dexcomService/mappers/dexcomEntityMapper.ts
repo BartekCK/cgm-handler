@@ -11,7 +11,7 @@ export class DexcomEntityMapper implements IDexcomEntityMapper {
         const date = new Date(parseInt(timestamp));
 
         return {
-            value: dexcomEntity.Value,
+            value: dexcomEntity.Value || null,
             trend: dexcomEntity.Trend as CgmGlucoseTrend,
             valueDate: date,
         };

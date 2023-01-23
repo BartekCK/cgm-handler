@@ -1,7 +1,9 @@
 import { z } from 'zod';
 import { commandSchema, ICommand } from '../../../common/command-bus';
 
-export const synchroniseLatestReadingsCommandPayloadSchema = commandSchema.extend({});
+export const synchroniseLatestReadingsCommandPayloadSchema = commandSchema.extend({
+    maxCount: z.number().int().optional(),
+});
 
 export type ISynchroniseLatestReadingsCommand = z.infer<
     typeof synchroniseLatestReadingsCommandPayloadSchema
@@ -9,11 +11,13 @@ export type ISynchroniseLatestReadingsCommand = z.infer<
     ICommand;
 
 export class SynchroniseLatestReadingsCommand
-implements ISynchroniseLatestReadingsCommand
+    implements ISynchroniseLatestReadingsCommand
 {
     readonly traceId: string;
+    readonly maxCount?: number;
 
-    constructor({ traceId }: ISynchroniseLatestReadingsCommand) {
+    constructor({ traceId, maxCount }: ISynchroniseLatestReadingsCommand) {
         this.traceId = traceId;
+        this.maxCount = maxCount;
     }
 }
