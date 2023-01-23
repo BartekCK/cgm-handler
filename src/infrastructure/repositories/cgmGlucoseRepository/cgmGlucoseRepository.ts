@@ -3,6 +3,8 @@ import {
     GetLatestReadingSuccess,
     GetLatestReadingSuccessResult,
     ICgmGlucoseRepository,
+    SaveManyResult,
+    SaveManySuccess,
     SaveResult,
     SaveSuccess,
 } from '../../../application/repositories/cgmGlucoseRepository/cgmGlucoseRepository.interface';
@@ -28,12 +30,12 @@ export class CgmGlucoseRepository implements ICgmGlucoseRepository {
                 .first();
 
             if (!result) {
-                return new GetLatestReadingSuccess(null);
+                return new GetLatestReadingSuccess({ cgmGlucose: null });
             }
 
-            return new GetLatestReadingSuccess(
-                this.cgmGlucoseDbEntityMapper.mapIntoCgmGlucoseEntity(result),
-            );
+            return new GetLatestReadingSuccess({
+                cgmGlucose: this.cgmGlucoseDbEntityMapper.mapIntoCgmGlucoseEntity(result),
+            });
         } catch (error) {
             return new DatabaseFailure({
                 errorMessage: 'Error occurred during getting latest CgmGlucose item',
@@ -57,6 +59,27 @@ export class CgmGlucoseRepository implements ICgmGlucoseRepository {
         } catch (error) {
             return new DatabaseFailure({
                 errorMessage: 'Error occurred during save CgmGlucose',
+                context: { error },
+            });
+        }
+    }
+
+    async saveMany(glucoses: CgmGlucose[]): Promise<SaveManyResult> {
+        try {
+            const dbEntities = glucoses.map((glucose) =>
+                this.cgmGlucoseDbEntityMapper.mapIntoCgmGlucoseDbEntity(glucose),
+            );
+
+            await this.dbClient
+                .insert<ICgmGlucoseDbEntity>(dbEntities)
+                .into(CGM_GLUCOSE_TABLE_NAME);
+
+            return new SaveManySuccess({
+                ids: glucoses.map((glucose) => glucose.getState().id),
+            });
+        } catch (error) {
+            return new DatabaseFailure({
+                errorMessage: 'Error occurred during save many CgmGlucose',
                 context: { error },
             });
         }

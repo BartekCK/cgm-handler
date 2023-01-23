@@ -53,6 +53,15 @@ describe('DexcomService', () => {
                     maxCount: 100,
                 });
                 assertResultFailure(result);
+
+                expect(result.getError()).toEqual({
+                    errorMessage: 'Minutes must be between 1 and 1440',
+                    errorCode: 'ARG_ERROR_MINUTES_INVALID',
+                    errorType: 'DOMAIN_ERROR',
+                    context: {
+                        minutesBefore: 0,
+                    },
+                });
             });
         });
 
@@ -63,6 +72,15 @@ describe('DexcomService', () => {
                     maxCount: 100,
                 });
                 assertResultFailure(result);
+
+                expect(result.getError()).toEqual({
+                    errorMessage: 'Minutes must be between 1 and 1440',
+                    errorCode: 'ARG_ERROR_MINUTES_INVALID',
+                    errorType: 'DOMAIN_ERROR',
+                    context: {
+                        minutesBefore: 1441,
+                    },
+                });
             });
         });
 
@@ -72,7 +90,17 @@ describe('DexcomService', () => {
                     minutesBefore: 10,
                     maxCount: 0,
                 });
+
                 assertResultFailure(result);
+
+                expect(result.getError()).toEqual({
+                    errorMessage: 'Max count must be between 1 and 287',
+                    errorCode: 'ARG_ERROR_MINUTES_INVALID',
+                    errorType: 'DOMAIN_ERROR',
+                    context: {
+                        maxCount: 0,
+                    },
+                });
             });
         });
 
@@ -82,7 +110,17 @@ describe('DexcomService', () => {
                     minutesBefore: 10,
                     maxCount: 288,
                 });
+
                 assertResultFailure(result);
+
+                expect(result.getError()).toEqual({
+                    errorMessage: 'Max count must be between 1 and 287',
+                    errorCode: 'ARG_ERROR_MINUTES_INVALID',
+                    errorType: 'DOMAIN_ERROR',
+                    context: {
+                        maxCount: 288,
+                    },
+                });
             });
         });
     });
@@ -93,7 +131,10 @@ describe('DexcomService', () => {
 
             beforeAll(async () => {
                 nock(dexcomRoute.getLatestGlucoseReadingsUrl())
-                    .post('', {})
+                    .post(
+                        `?sessionID[sessionId]=${sessionId}&minutes=${minutesBefore}&maxCount=${maxCount}`,
+                        {},
+                    )
                     .reply(500, {});
 
                 result = await dexcomService.getReadings({ minutesBefore, maxCount });

@@ -1,6 +1,8 @@
 import { v4 } from 'uuid';
 
-// export type CgmGlucoseProps = z.infer<typeof configPropsSchema>;
+import { InvalidPayloadFailure } from '../../../common/types/invalidPayloadFailure';
+import { FailureResult, SuccessResult } from '../../../common/types/result';
+import { z } from 'zod';
 
 export type CgmGlucoseId = string & { name: 'CgmGlucoseId' };
 
@@ -25,11 +27,21 @@ export interface CgmGlucoseState {
     createdAt: Date;
 }
 
-export interface CreateCgmGlucosePayload {
-    value: number | null;
-    valueDate: Date;
-    trend: CgmGlucoseTrend;
-}
+const createCgmGlucosePayloadSchema = z.object({
+    value: z.number().nullable(),
+    valueDate: z.date(),
+    trend: z.nativeEnum(CgmGlucoseTrend),
+});
+export type CreateCgmGlucosePayload = z.infer<typeof createCgmGlucosePayloadSchema>;
+
+export class CreateCgmGlucoseSuccess extends SuccessResult<{
+    cgmGlucose: CgmGlucose;
+}> {}
+export class CreateCgmGlucoseFailure extends FailureResult {}
+export type CreateCgmGlucoseResult =
+    | CreateCgmGlucoseSuccess
+    | CreateCgmGlucoseFailure
+    | InvalidPayloadFailure;
 
 export class CgmGlucose {
     private constructor(private readonly state: CgmGlucoseState) {}
@@ -38,24 +50,40 @@ export class CgmGlucose {
         return new CgmGlucose(state);
     }
 
-    public static create({
-        valueDate,
-        trend,
-        value,
-    }: CreateCgmGlucosePayload): CgmGlucose {
-        if (
-            !value &&
-            ![CgmGlucoseTrend.RateOutOfRange, CgmGlucoseTrend.None].includes(trend)
-        ) {
-            throw new Error('Should be value here');
+    public static create(payload: CreateCgmGlucosePayload): CreateCgmGlucoseResult {
+        const payloadResult = createCgmGlucosePayloadSchema.safeParse(payload);
+
+        if (!payloadResult.success) {
+            return new InvalidPayloadFailure({
+                errorMessage: 'Invalid payload during creating CgmGlucose',
+                context: { ...payloadResult.error },
+            });
         }
 
-        return new CgmGlucose({
-            valueDate: valueDate,
-            trend,
-            value,
-            id: v4() as CgmGlucoseId,
-            createdAt: new Date(),
+        const { value, valueDate, trend } = payloadResult.data;
+
+        const allowedTrendsWhenNullValue = [
+            CgmGlucoseTrend.RateOutOfRange,
+            CgmGlucoseTrend.None,
+        ];
+
+        if (!value && !allowedTrendsWhenNullValue.includes(trend)) {
+            return new CreateCgmGlucoseFailure({
+                errorMessage: 'Value should not be null during CgmGlucose creation',
+                errorType: 'DOMAIN_ERROR',
+                errorCode: 'INCORRECT_VALUE_IN_CGM_GLUCOSE',
+                context: { value, trend, allowedTrendsWhenNullValue },
+            });
+        }
+
+        return new CreateCgmGlucoseSuccess({
+            cgmGlucose: new CgmGlucose({
+                valueDate: valueDate,
+                trend,
+                value,
+                id: v4() as CgmGlucoseId,
+                createdAt: new Date(),
+            }),
         });
     }
 
