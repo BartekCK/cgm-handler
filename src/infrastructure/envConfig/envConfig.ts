@@ -33,6 +33,7 @@ export class EnvConfig implements IEnvConfig {
         });
 
         console.log(props);
+        console.log(props.dexcomPassword !== '');
 
         this.props = props;
     }
