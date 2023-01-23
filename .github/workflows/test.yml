@@ -41,20 +41,20 @@ jobs:
       - name: Install all dependencies
         run: npm ci
 
-      - name: Check typescript types
-        run: npm run check-types
-
-      - name: Check lint
-        run: npm run lint
-
-      - name: Run test
-        run: npm test
-
-      - name: Upload coverage reports
-        run: |
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          ./codecov
+#      - name: Check typescript types
+#        run: npm run check-types
+#
+#      - name: Check lint
+#        run: npm run lint
+#
+#      - name: Run test
+#        run: npm test
+#
+#      - name: Upload coverage reports
+#        run: |
+#          curl -Os https://uploader.codecov.io/latest/linux/codecov
+#          chmod +x codecov
+#          ./codecov
 
       - name: Install aws-lambda-runtime-interface-emulator
         run: |

@@ -58,5 +58,9 @@ export const lambdaHandler = async (event: Record<string, unknown>) => {
         Promise<SynchroniseLatestReadingsCommandHandlerResult>
     >(command);
 
-    return handlerResult;
+    if (handlerResult.isFailure()) {
+        return handlerResult.getError();
+    }
+
+    return handlerResult.getData();
 };
