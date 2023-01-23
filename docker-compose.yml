@@ -11,4 +11,29 @@ services:
       - "${DATABASE_PORT}:${DATABASE_PORT}"
     volumes:
       - ./.db/postgres-config.sql:/docker-entrypoint-initdb.d/postgres-config.sql
+    healthcheck:
+      test: pg_isready
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  cgm-handler:
+    build:
+      context: .
+      args:
+        - NODE_ENV=production
+    ports:
+      - "9000:8080"
+    environment:
+      - DEXCOM_USERNAME=${DEXCOM_USERNAME}
+      - DEXCOM_PASSWORD=${DEXCOM_PASSWORD}
+      - DEXCOM_APPLICATION_ID=${DEXCOM_APPLICATION_ID}
+      - DEXCOM_USER_LOCATION=${DEXCOM_USER_LOCATION}
+      - DATABASE_HOST=postgres
+      - DATABASE_PORT=5432
+      - DATABASE_USER=${DATABASE_USER}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD}
+      - DATABASE_NAME=${DATABASE_NAME}
+    depends_on:
+      - postgres
 

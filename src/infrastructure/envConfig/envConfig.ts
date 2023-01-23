@@ -40,11 +40,12 @@ export class EnvConfig implements IEnvConfig {
     }
 
     public static async factory(): Promise<IEnvConfig> {
+        console.log(process.env.NODE_ENV);
         if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
             const { config } = await import('dotenv');
-
+            console.log(process.cwd());
             config({
-                path: process.env['NODE_ENV'] === 'test' ? './.env.test' : undefined,
+                path: process.env['NODE_ENV'] === 'test' ? './.env.test' : './.env',
             });
         }
 
