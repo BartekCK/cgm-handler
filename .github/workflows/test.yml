@@ -56,11 +56,6 @@ jobs:
           chmod +x codecov
           ./codecov
 
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
       - name: Install aws-lambda-runtime-interface-emulator
         run: |
           mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
@@ -75,8 +70,32 @@ jobs:
           docker build -t cgm-handler:$COMMIT_HASH .
 
       - name: Run cgm-handler-container
+        env:
+          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+          DEXCOM_USER_LOCATION: EU
+          DATABASE_HOST: postgres
+          DATABASE_PORT: 5432
+          DATABASE_USER: user123
+          DATABASE_PASSWORD: root
+          DATABASE_NAME: test
         run: |
-          docker run --rm -d -p 9000:8080 --name cgm-handler-container cgm-handler:$COMMIT_HASH
+          echo "Trigger all migrations"
+          npm run migrations:latest
+          echo "Running image with tag: $COMMIT_HASH"
+          docker run --rm -d -p 9000:8080 \
+          --name cgm-handler-container \
+          -e DEXCOM_USERNAME \
+          -e DEXCOM_PASSWORD \
+          -e DEXCOM_APPLICATION_ID \
+          -e DEXCOM_USER_LOCATION \
+          -e DATABASE_HOST \
+          -e DATABASE_PORT \
+          -e DATABASE_USER \
+          -e DATABASE_PASSWORD \
+          -e DATABASE_NAME \
+          cgm-handler:$COMMIT_HASH
 
       - name: Check if image is appropriate for Lambda Container
         run: |
