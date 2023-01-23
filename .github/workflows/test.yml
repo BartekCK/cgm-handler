@@ -69,6 +69,20 @@ jobs:
           echo "Building image with tag: $COMMIT_HASH"
           docker build -t cgm-handler:$COMMIT_HASH .
 
+      - name: Run migrations for docker image
+        env:
+          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+          DEXCOM_USER_LOCATION: EU
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USER: user123
+          DATABASE_PASSWORD: root
+          DATABASE_NAME: test
+        run: |
+          npm run migrations:latest
+
       - name: Run cgm-handler-container
         env:
           DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
@@ -81,8 +95,6 @@ jobs:
           DATABASE_PASSWORD: root
           DATABASE_NAME: test
         run: |
-          echo "Trigger all migrations"
-          npm run migrations:latest
           echo "Running image with tag: $COMMIT_HASH"
           docker run --rm -d -p 9000:8080 \
           --name cgm-handler-container \
