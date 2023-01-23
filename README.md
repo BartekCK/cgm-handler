@@ -1,4 +1,5 @@
 
+[![codecov](https://codecov.io/gh/BartekCK/cgm-handler/branch/develop/graph/badge.svg?token=XZC8ABPXDH)](https://codecov.io/gh/BartekCK/cgm-handler)
 
 ### TODO:
 1. Add contract tests

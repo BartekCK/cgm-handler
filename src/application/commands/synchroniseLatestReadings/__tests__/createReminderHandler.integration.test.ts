@@ -34,6 +34,8 @@ import {
 import { InvalidPayloadFailure } from '../../../../common/types/invalidPayloadFailure';
 import nock = require('nock');
 import { dexcomEntityTestFactory } from '../../../../infrastructure/services/dexcomService/__tests__/dexcomEntityTestFactory';
+import { cgmGlucoseDbEntityTestFactory } from '../../../../infrastructure/repositories/cgmGlucoseRepository/__tests__/cgmGlucoseDbEntityTestFactory';
+import { ICgmGlucoseDbEntity } from '../../../../infrastructure/repositories/cgmGlucoseRepository/cgmGlucoseDbEntity.interface';
 
 describe('SynchroniseLatestReadingsCommandHandler', () => {
     let commandBus: ICommandBus;
@@ -140,6 +142,67 @@ describe('SynchroniseLatestReadingsCommandHandler', () => {
                     .whereIn('id', result.getData().ids);
 
                 expect(dbRecords).toHaveLength(dexcomEntities.length);
+            });
+        });
+
+        describe('when sync was made n time', () => {
+            const firstValueDate = new Date(Date.now() - 100000);
+            const secondValueDate = new Date(Date.now() - 200000);
+
+            const cgmGlucoseDbEntity = cgmGlucoseDbEntityTestFactory({
+                valueDate: new Date(Date.now() - 300000),
+            });
+
+            const latestDexcomEntities = [
+                dexcomEntityTestFactory({ valueDate: firstValueDate }),
+                dexcomEntityTestFactory({ valueDate: secondValueDate }),
+            ];
+
+            const oldestDexcomEntities = [
+                dexcomEntityTestFactory({ valueDate: new Date(Date.now() - 400000) }),
+                dexcomEntityTestFactory({ valueDate: new Date(Date.now() - 500000) }),
+            ];
+
+            let result: SynchroniseLatestReadingsCommandHandlerSuccess;
+
+            beforeAll(async () => {
+                await dbClient(CGM_GLUCOSE_TABLE_NAME).truncate();
+                await dbClient.insert(cgmGlucoseDbEntity).into(CGM_GLUCOSE_TABLE_NAME);
+
+                nock(dexcomRoute.getLatestGlucoseReadingsUrl(), {})
+                    .post(
+                        `?sessionID=${sessionId}&minutes=${minutesBefore}&maxCount=${maxCount}`,
+                        {},
+                    )
+                    .reply(200, [...oldestDexcomEntities, ...latestDexcomEntities]);
+
+                const handlerResult = await commandBus.execute<
+                    SynchroniseLatestReadingsCommand,
+                    Promise<SynchroniseLatestReadingsCommandHandlerResult>
+                >(command);
+
+                assertResultSuccess(handlerResult);
+
+                result = handlerResult;
+            });
+
+            it('then latest readings should be persisted', async () => {
+                const dbRecords = await dbClient
+                    .select<ICgmGlucoseDbEntity[]>()
+                    .from(CGM_GLUCOSE_TABLE_NAME)
+                    .whereIn('id', result.getData().ids);
+
+                expect(dbRecords.map((dbe) => dbe.valueDate)).toEqual(
+                    expect.arrayContaining([firstValueDate, secondValueDate]),
+                );
+            });
+
+            it('then in database should be 3 items', async () => {
+                const dbRecords = await dbClient
+                    .select<ICgmGlucoseDbEntity[]>()
+                    .from(CGM_GLUCOSE_TABLE_NAME);
+
+                expect(dbRecords).toHaveLength(3);
             });
         });
     });
