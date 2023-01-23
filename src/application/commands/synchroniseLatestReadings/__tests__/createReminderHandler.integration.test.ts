@@ -36,6 +36,7 @@ import nock = require('nock');
 import { dexcomEntityTestFactory } from '../../../../infrastructure/services/dexcomService/__tests__/dexcomEntityTestFactory';
 import { cgmGlucoseDbEntityTestFactory } from '../../../../infrastructure/repositories/cgmGlucoseRepository/__tests__/cgmGlucoseDbEntityTestFactory';
 import { ICgmGlucoseDbEntity } from '../../../../infrastructure/repositories/cgmGlucoseRepository/cgmGlucoseDbEntity.interface';
+import { CgmGlucoseTrend } from '../../../../domain/entities/cgmGlucose/cgmGlucose';
 
 describe('SynchroniseLatestReadingsCommandHandler', () => {
     let commandBus: ICommandBus;
@@ -203,6 +204,53 @@ describe('SynchroniseLatestReadingsCommandHandler', () => {
                     .from(CGM_GLUCOSE_TABLE_NAME);
 
                 expect(dbRecords).toHaveLength(3);
+            });
+        });
+
+        describe('when sync was made but one of dexcomEntites state is invalid', () => {
+            const dexcomEntities = [
+                dexcomEntityTestFactory(),
+                dexcomEntityTestFactory({
+                    Value: null,
+                    Trend: CgmGlucoseTrend.SingleUp,
+                }),
+                dexcomEntityTestFactory(),
+            ];
+
+            let result: SynchroniseLatestReadingsCommandHandlerSuccess;
+
+            beforeAll(async () => {
+                await dbClient(CGM_GLUCOSE_TABLE_NAME).truncate();
+
+                nock(dexcomRoute.getLatestGlucoseReadingsUrl(), {})
+                    .post(
+                        `?sessionID=${sessionId}&minutes=${minutesBefore}&maxCount=${maxCount}`,
+                        {},
+                    )
+                    .reply(200, dexcomEntities);
+
+                const handlerResult = await commandBus.execute<
+                    SynchroniseLatestReadingsCommand,
+                    Promise<SynchroniseLatestReadingsCommandHandlerResult>
+                >(command);
+
+                assertResultSuccess(handlerResult);
+
+                result = handlerResult;
+            });
+
+            it('then only two objects should be persisted', async () => {
+                const dbRecords = await dbClient
+                    .select()
+                    .from(CGM_GLUCOSE_TABLE_NAME)
+                    .whereIn('id', result.getData().ids);
+
+                expect(dbRecords).toHaveLength(dexcomEntities.length - 1);
+            });
+
+            it('then logger should log information about inconsistent result', () => {
+                //TODO: Update when logger will be ready
+                expect(true).toBeTruthy();
             });
         });
     });

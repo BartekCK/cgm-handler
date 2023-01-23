@@ -18,7 +18,7 @@ export const dexcomEntitySchema = z.object({
     WT: z.string().regex(dateRegex),
     ST: z.string().regex(dateRegex),
     DT: z.string().regex(dateWithTimezoneRegex),
-    Value: z.number().optional(),
+    Value: z.number().optional().nullable(),
     Trend: z.string(),
 });
 
