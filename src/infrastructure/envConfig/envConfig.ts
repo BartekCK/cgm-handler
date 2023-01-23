@@ -32,6 +32,8 @@ export class EnvConfig implements IEnvConfig {
             databaseName: process.env['DATABASE_NAME'],
         });
 
+        console.log(props);
+
         this.props = props;
     }
 
@@ -40,7 +42,6 @@ export class EnvConfig implements IEnvConfig {
     }
 
     public static async factory(): Promise<IEnvConfig> {
-        console.log(process.env.NODE_ENV);
         if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
             const { config } = await import('dotenv');
             console.log(process.cwd());

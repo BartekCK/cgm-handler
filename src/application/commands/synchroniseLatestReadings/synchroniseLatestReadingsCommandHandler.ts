@@ -84,8 +84,6 @@ export class SynchroniseLatestReadingsCommandHandler
             return latestCgmGlucoseResult;
         }
 
-        console.log('AFTER queries 2');
-
         const { readings: dexcomReadings } = dexcomReadingsResult.getData();
 
         const dexcomReadingsValidationResult = dexcomReadingSchema
