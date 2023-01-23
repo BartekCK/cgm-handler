@@ -6,16 +6,18 @@ import {
 } from '../../../application/services/dexcomService/dexcomService.interface';
 import { IDexcomAuth } from './auth/dexcomAuth.interface';
 import { IDexcomRoute } from './routing/dexcomRoute.interface';
-import axios, { AxiosError, AxiosResponse } from 'axios';
-import { IDexcomReading } from '../../../application/services/dexcomService/dexcomReading.interface';
-import { dexcomEntitySchema, IDexcomEntity } from './mappers/dexcomEntity.inteface';
+import axios, { AxiosError } from 'axios';
+import { dexcomEntitySchema, IDexcomEntity } from './dexcomEntity.inteface';
 import { IDexcomEntityMapper } from './mappers/dexcomEntityMapper.interface';
 
 export class DexcomService implements IDexcomService {
+    private readonly MAX_LOOP_ITERATION = 2;
+
     constructor(
         private readonly dexcomAuth: IDexcomAuth,
         private readonly dexcomRoute: IDexcomRoute,
         private readonly dexcomEntityMapper: IDexcomEntityMapper,
+        private sessionId: string | null = null,
     ) {}
 
     public async getReadings(data: {
@@ -46,31 +48,42 @@ export class DexcomService implements IDexcomService {
             });
         }
 
-        const authStateResult = await this.dexcomAuth.createAuthState();
+        let i = 0;
+        let shouldBeRepeated = false;
+        let httpRequestResult: IDexcomEntity[] | GetReadingsFailure;
 
-        if (authStateResult.isFailure()) {
-            return authStateResult;
-        }
+        do {
+            shouldBeRepeated = false;
 
-        const { sessionId } = authStateResult.getData().auth;
+            if (!this.sessionId) {
+                const authStateResult = await this.dexcomAuth.createAuthState();
 
-        let response: AxiosResponse<IDexcomReading[], any>;
+                if (authStateResult.isFailure()) {
+                    return authStateResult;
+                }
 
-        const httpRequestResult = await this.getLatestReadingsHttpRequest({
-            sessionId,
-            maxCount,
-            minutesBefore,
-        });
+                this.sessionId = authStateResult.getData().auth.sessionId;
+            }
+
+            httpRequestResult = await this.getLatestReadingsHttpRequest({
+                sessionId: this.sessionId,
+                maxCount,
+                minutesBefore,
+            });
+
+            if (
+                httpRequestResult instanceof GetReadingsFailure &&
+                httpRequestResult.getError().errorCode === 'SESSION_ID_EXPIRED'
+            ) {
+                shouldBeRepeated = true;
+                this.sessionId = null;
+            }
+
+            i++;
+        } while (i < this.MAX_LOOP_ITERATION && shouldBeRepeated);
 
         if (httpRequestResult instanceof GetReadingsFailure) {
-            const { errorCode } = httpRequestResult.getError();
-
-            if (errorCode === 'SESSION_ID_NOT_FOUND') {
-                console.log('DO IT ONCE AGAIN');
-                return;
-            } else {
-                return httpRequestResult;
-            }
+            return httpRequestResult;
         }
 
         const dexcomEntitySchemaResult = dexcomEntitySchema
@@ -89,10 +102,10 @@ export class DexcomService implements IDexcomService {
             });
         }
 
-        const dexcomEnitities: IDexcomEntity[] = dexcomEntitySchemaResult.data;
+        const dexcomEntities: IDexcomEntity[] = dexcomEntitySchemaResult.data;
 
         return new GetReadingsSuccess({
-            readings: dexcomEnitities.map((dexcomEnity) =>
+            readings: dexcomEntities.map((dexcomEnity) =>
                 this.dexcomEntityMapper.mapIntoDexcomReading(dexcomEnity),
             ),
         });
@@ -127,6 +140,17 @@ export class DexcomService implements IDexcomService {
                     errorCode: 'UNKNOWN_LIBRARY_ERROR',
                     context: {
                         library: 'axios',
+                    },
+                });
+            }
+
+            if (error.response?.data.code === 'SessionNotValid') {
+                return new GetReadingsFailure({
+                    errorMessage: 'Session id is expired',
+                    errorType: 'INFRASTRUCTURE_ERROR',
+                    errorCode: 'SESSION_ID_EXPIRED',
+                    context: {
+                        data: error.response.data,
                     },
                 });
             }

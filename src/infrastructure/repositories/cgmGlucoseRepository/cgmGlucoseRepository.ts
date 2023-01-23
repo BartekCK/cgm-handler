@@ -35,7 +35,10 @@ export class CgmGlucoseRepository implements ICgmGlucoseRepository {
                 this.cgmGlucoseDbEntityMapper.mapIntoCgmGlucoseEntity(result),
             );
         } catch (error) {
-            return new DatabaseFailure('GetLatestReadingSuccessResult', error);
+            return new DatabaseFailure({
+                errorMessage: 'Error occurred during getting latest CgmGlucose item',
+                context: { error },
+            });
         }
     }
 
@@ -52,7 +55,10 @@ export class CgmGlucoseRepository implements ICgmGlucoseRepository {
 
             return new SaveSuccess({ id: glucose.getState().id });
         } catch (error) {
-            return new DatabaseFailure('SaveResult', error);
+            return new DatabaseFailure({
+                errorMessage: 'Error occurred during save CgmGlucose',
+                context: { error },
+            });
         }
     }
 }

@@ -56,7 +56,7 @@ export class DexcomAuth implements IDexcomAuth {
 
     private async login(accountId: string): Promise<string | CreateAuthStateFailure> {
         try {
-            const response = await axios.post(this.dexcomRoute.getAuthUrl(), {
+            const response = await axios.post(this.dexcomRoute.getLoginUrl(), {
                 password: this.envDexcomConfig.getDexcomPassword(),
                 applicationId: this.envDexcomConfig.getDexcomApplicationId(),
                 accountId,

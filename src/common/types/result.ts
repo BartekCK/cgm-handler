@@ -46,7 +46,6 @@ export abstract class FailureResult<T = any> extends Result {
         context?: T;
     }) {
         const { errorCode, errorType, errorMessage, context } = data;
-
         super(false);
 
         this.errorMessage = errorMessage;
@@ -55,11 +54,17 @@ export abstract class FailureResult<T = any> extends Result {
         this.context = context;
     }
 
-    public getError(): { errorMessage: string; errorCode: string; errorType: string } {
+    public getError(): {
+        errorMessage: string;
+        errorCode: string;
+        errorType: string;
+        context?: T;
+    } {
         return {
             errorMessage: this.errorMessage,
             errorCode: this.errorCode,
             errorType: this.errorType,
+            context: this.context,
         };
     }
 
