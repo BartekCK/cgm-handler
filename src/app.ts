@@ -59,8 +59,8 @@ export const lambdaHandler = async (event: Record<string, unknown>) => {
     >(command);
 
     if (handlerResult.isFailure()) {
-        return handlerResult.getError();
+        return JSON.stringify(handlerResult.getError());
     }
 
-    return handlerResult.getData();
+    return JSON.stringify(handlerResult.getData());
 };
