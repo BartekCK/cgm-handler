@@ -1,7 +1,7 @@
 
 
 ### TODO:
-1. Exclude dir migrations and tests from production build
+1. Add contract tests
 
 
 ### Migrations

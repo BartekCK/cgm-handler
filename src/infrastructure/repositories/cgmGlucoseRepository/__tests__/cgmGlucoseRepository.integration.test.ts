@@ -122,6 +122,7 @@ describe('cgmGlucoseRepository', () => {
         });
 
         beforeAll(async () => {
+            await dbClient(CGM_GLUCOSE_TABLE_NAME).truncate();
             await dbClient
                 .insert([pastCgmGlucoseDbEntity, latestCgmGlucoseDbEntity])
                 .into(CGM_GLUCOSE_TABLE_NAME);

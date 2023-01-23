@@ -45,11 +45,7 @@ export class CgmGlucose {
     }: CreateCgmGlucosePayload): CgmGlucose {
         if (
             !value &&
-            ![
-                CgmGlucoseTrend.RateOutOfRange,
-                CgmGlucoseTrend.NotComputable,
-                CgmGlucoseTrend.None,
-            ].includes(trend)
+            ![CgmGlucoseTrend.RateOutOfRange, CgmGlucoseTrend.None].includes(trend)
         ) {
             throw new Error('Should be value here');
         }

@@ -1,7 +1,12 @@
 import { FailureResult } from './result';
 
 export class DatabaseFailure extends FailureResult {
-    public constructor(errorMessage: string, context?: unknown) {
-        super(errorMessage, 'DATABASE_FAILURE', 'INFRASTRUCTURE_ERROR', context);
+    public constructor(data: { errorMessage: string; context?: unknown }) {
+        super({
+            errorMessage: data.errorMessage,
+            errorCode: 'DATABASE_FAILURE',
+            errorType: 'INFRASTRUCTURE_ERROR',
+            context: data.context,
+        });
     }
 }

@@ -31,18 +31,21 @@ export abstract class SuccessResult<T> extends Result {
     }
 }
 
+export type ERROR_TYPE = 'DOMAIN_ERROR' | 'INFRASTRUCTURE_ERROR';
+
 export abstract class FailureResult<T = any> extends Result {
     protected readonly errorMessage: string;
     protected readonly errorCode: string;
-    protected readonly errorType: 'DOMAIN_ERROR' | 'INFRASTRUCTURE_ERROR';
+    protected readonly errorType: ERROR_TYPE;
     protected readonly context?: T;
 
-    public constructor(
-        errorMessage: string,
-        errorCode: string,
-        errorType: 'DOMAIN_ERROR' | 'INFRASTRUCTURE_ERROR',
-        context?: T,
-    ) {
+    public constructor(data: {
+        errorMessage: string;
+        errorCode: string;
+        errorType: 'DOMAIN_ERROR' | 'INFRASTRUCTURE_ERROR';
+        context?: T;
+    }) {
+        const { errorCode, errorType, errorMessage, context } = data;
         super(false);
 
         this.errorMessage = errorMessage;
@@ -51,11 +54,17 @@ export abstract class FailureResult<T = any> extends Result {
         this.context = context;
     }
 
-    public getError(): { errorMessage: string; errorCode: string; errorType: string } {
+    public getError(): {
+        errorMessage: string;
+        errorCode: string;
+        errorType: string;
+        context?: T;
+        } {
         return {
             errorMessage: this.errorMessage,
             errorCode: this.errorCode,
             errorType: this.errorType,
+            context: this.context,
         };
     }
 

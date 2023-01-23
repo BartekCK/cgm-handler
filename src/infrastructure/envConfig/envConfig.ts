@@ -1,9 +1,12 @@
 import { z } from 'zod';
 import { IEnvConfig } from './envConfig.interface';
+import { UserLocation } from '../../common/types/userLocation';
 
 const configPropsSchema = z.object({
     dexcomPassword: z.string(),
     dexcomUsername: z.string(),
+    dexcomApplicationId: z.string(),
+    dexcomUserLocation: z.nativeEnum(UserLocation),
     databaseHost: z.string(),
     databasePort: z.number(),
     databaseUser: z.string(),
@@ -20,6 +23,8 @@ export class EnvConfig implements IEnvConfig {
         const props = configPropsSchema.parse({
             dexcomPassword: process.env['DEXCOM_PASSWORD'],
             dexcomUsername: process.env['DEXCOM_USERNAME'],
+            dexcomApplicationId: process.env['DEXCOM_APPLICATION_ID'],
+            dexcomUserLocation: process.env['DEXCOM_USER_LOCATION'],
             databaseHost: process.env['DATABASE_HOST'],
             databasePort: Number(process.env['DATABASE_PORT']),
             databaseUser: process.env['DATABASE_USER'],
@@ -28,6 +33,10 @@ export class EnvConfig implements IEnvConfig {
         });
 
         this.props = props;
+    }
+
+    getDexcomUserLocation(): UserLocation {
+        return this.props.dexcomUserLocation;
     }
 
     public static async factory(): Promise<IEnvConfig> {
@@ -68,5 +77,9 @@ export class EnvConfig implements IEnvConfig {
 
     getDatabaseUser(): string {
         return this.props.databaseUser;
+    }
+
+    getDexcomApplicationId(): string {
+        return this.props.dexcomApplicationId;
     }
 }

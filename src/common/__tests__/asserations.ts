@@ -12,7 +12,7 @@ export function assertResultSuccess<T = any>(
 
 export function assertResultFailure(
     result: FailureResult | SuccessResult<any>,
-): asserts result is SuccessResult<any> {
+): asserts result is FailureResult<any> {
     if (result.isSuccess()) {
         throw new Error('Result should be failure');
     }
