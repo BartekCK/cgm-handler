@@ -26,7 +26,7 @@ type Dependencies = {
 };
 
 export class SynchroniseLatestReadingsCommandHandler
-    implements
+implements
         ICommandHandler<
             ISynchroniseLatestReadingsCommand,
             Promise<SynchroniseLatestReadingsCommandHandlerResult>

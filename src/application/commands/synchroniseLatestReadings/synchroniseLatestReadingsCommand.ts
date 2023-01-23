@@ -9,7 +9,7 @@ export type ISynchroniseLatestReadingsCommand = z.infer<
     ICommand;
 
 export class SynchroniseLatestReadingsCommand
-    implements ISynchroniseLatestReadingsCommand
+implements ISynchroniseLatestReadingsCommand
 {
     readonly traceId: string;
 

@@ -59,7 +59,7 @@ export abstract class FailureResult<T = any> extends Result {
         errorCode: string;
         errorType: string;
         context?: T;
-    } {
+        } {
         return {
             errorMessage: this.errorMessage,
             errorCode: this.errorCode,
