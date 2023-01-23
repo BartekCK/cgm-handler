@@ -3,15 +3,15 @@ import { IEnvConfig } from './envConfig.interface';
 import { UserLocation } from '../../common/types/userLocation';
 
 const configPropsSchema = z.object({
-    dexcomPassword: z.string(),
-    dexcomUsername: z.string(),
-    dexcomApplicationId: z.string(),
+    dexcomPassword: z.string().min(1),
+    dexcomUsername: z.string().min(1),
+    dexcomApplicationId: z.string().min(1),
     dexcomUserLocation: z.nativeEnum(UserLocation),
-    databaseHost: z.string(),
+    databaseHost: z.string().min(1),
     databasePort: z.number(),
-    databaseUser: z.string(),
-    databasePassword: z.string(),
-    databaseName: z.string(),
+    databaseUser: z.string().min(1),
+    databasePassword: z.string().min(1),
+    databaseName: z.string().min(1),
 });
 
 type ConfigProps = z.infer<typeof configPropsSchema>;
