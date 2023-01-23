@@ -95,6 +95,7 @@ jobs:
           DATABASE_PASSWORD: root
           DATABASE_NAME: test
         run: |
+          run: echo $DEXCOM_USERNAME
           echo "Running image with tag: $COMMIT_HASH"
           docker run --rm -d -p 9000:8080 \
           --name cgm-handler-container \
