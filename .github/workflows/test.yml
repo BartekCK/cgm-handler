@@ -111,7 +111,15 @@ jobs:
 
       - name: Check if image is appropriate for Lambda Container
         run: |
-          curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+          set -e
+          response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}')
+          echo $response
+          if echo $response | grep -q "error"; then
+              echo "Error found in response"
+              exit 1
+          else
+              echo "No errors found in response"
+          fi
 
       - name: Clear after pipeline
         run: |
