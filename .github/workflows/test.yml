@@ -85,8 +85,8 @@ jobs:
 
       - name: Run cgm-handler-container
         env:
-          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME, env:production }}
-          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD, env:production }}
+          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
           DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
           DEXCOM_USER_LOCATION: EU
           DATABASE_HOST: postgres
