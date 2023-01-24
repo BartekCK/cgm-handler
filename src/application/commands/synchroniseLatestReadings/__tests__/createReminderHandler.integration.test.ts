@@ -37,6 +37,7 @@ import { dexcomEntityTestFactory } from '../../../../infrastructure/services/dex
 import { cgmGlucoseDbEntityTestFactory } from '../../../../infrastructure/repositories/cgmGlucoseRepository/__tests__/cgmGlucoseDbEntityTestFactory';
 import { ICgmGlucoseDbEntity } from '../../../../infrastructure/repositories/cgmGlucoseRepository/cgmGlucoseDbEntity.interface';
 import { CgmGlucoseTrend } from '../../../../domain/entities/cgmGlucose/cgmGlucose';
+import { faker } from '@faker-js/faker';
 
 describe('SynchroniseLatestReadingsCommandHandler', () => {
     let commandBus: ICommandBus;
@@ -254,6 +255,50 @@ describe('SynchroniseLatestReadingsCommandHandler', () => {
             it('then logger should log information about inconsistent result', () => {
                 //TODO: Update when logger will be ready
                 expect(true).toBeTruthy();
+            });
+        });
+    });
+
+    describe('Given correct `SynchroniseLatestReadingsCommand` with user maxCount', () => {
+        const userMaxCount = faker.datatype.number({ min: 5, max: 100 });
+
+        const command = new SynchroniseLatestReadingsCommand({
+            traceId: v4(),
+            maxCount: userMaxCount,
+        });
+
+        describe('when command was executed', () => {
+            const dexcomEntities = [dexcomEntityTestFactory()];
+
+            let result: SynchroniseLatestReadingsCommandHandlerSuccess;
+
+            beforeAll(async () => {
+                await dbClient(CGM_GLUCOSE_TABLE_NAME).truncate();
+
+                nock(dexcomRoute.getLatestGlucoseReadingsUrl(), {})
+                    .post(
+                        `?sessionID=${sessionId}&minutes=${minutesBefore}&maxCount=${userMaxCount}`,
+                        {},
+                    )
+                    .reply(200, dexcomEntities);
+
+                const handlerResult = await commandBus.execute<
+                    SynchroniseLatestReadingsCommand,
+                    Promise<SynchroniseLatestReadingsCommandHandlerResult>
+                >(command);
+
+                assertResultSuccess(handlerResult);
+
+                result = handlerResult;
+            });
+
+            it('then all objects should be persisted', async () => {
+                const dbRecords = await dbClient
+                    .select()
+                    .from(CGM_GLUCOSE_TABLE_NAME)
+                    .whereIn('id', result.getData().ids);
+
+                expect(dbRecords).toHaveLength(dexcomEntities.length);
             });
         });
     });
