@@ -8,7 +8,7 @@ const configPropsSchema = z.object({
     dexcomApplicationId: z.string().min(1),
     dexcomUserLocation: z.nativeEnum(UserLocation),
     databaseHost: z.string().min(1),
-    databasePort: z.number().optional(),
+    databasePort: z.number(),
     databaseUser: z.string().min(1),
     databasePassword: z.string().min(1),
     databaseName: z.string().min(1),
@@ -26,9 +26,7 @@ export class EnvConfig implements IEnvConfig {
             dexcomApplicationId: process.env['DEXCOM_APPLICATION_ID'],
             dexcomUserLocation: process.env['DEXCOM_USER_LOCATION'],
             databaseHost: process.env['DATABASE_HOST'],
-            databasePort: process.env['DATABASE_PORT']
-                ? Number(process.env['DATABASE_PORT'])
-                : undefined,
+            databasePort: process.env['DATABASE_PORT'],
             databaseUser: process.env['DATABASE_USER'],
             databasePassword: process.env['DATABASE_PASSWORD'],
             databaseName: process.env['DATABASE_NAME'],
@@ -73,7 +71,7 @@ export class EnvConfig implements IEnvConfig {
         return this.props.databasePassword;
     }
 
-    getDatabasePort(): number | undefined {
+    getDatabasePort(): number {
         return this.props.databasePort;
     }
 

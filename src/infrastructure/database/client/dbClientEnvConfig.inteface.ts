@@ -1,6 +1,6 @@
 export interface IDbClientEnvConfig {
     getDatabaseHost: () => string;
-    getDatabasePort: () => number | undefined;
+    getDatabasePort: () => number;
     getDatabaseUser: () => string;
     getDatabasePassword: () => string;
     getDatabaseName: () => string;

@@ -57,6 +57,18 @@ jobs:
 #          chmod +x codecov
 #          ./codecov
 
+  build:
+
+    runs-on: ubuntu-latest
+    environment: test
+
+    steps:
+
+      - uses: actions/checkout@v3
+
+      - name: Install all dependencies
+        run: npm ci
+
       - name: Install aws-lambda-runtime-interface-emulator
         run: |
           mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
@@ -64,13 +76,20 @@ jobs:
       - name: Set COMMIT_HASH environment variable
         run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-
-      - name: Build Docker image
+      - name: Build docker compose
+        env:
+          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+          DEXCOM_USER_LOCATION: EU
+          DATABASE_PORT: 5432
+          DATABASE_USER: user123
+          DATABASE_PASSWORD: root
+          DATABASE_NAME: glucose_dev
         run: |
-          echo "Building image with tag: $COMMIT_HASH"
-          docker build -t cgm-handler:$COMMIT_HASH .
+          docker-compose up -d --build
 
-      - name: Run migrations for docker image
+      - name: Run migrations for containerised postgres
         env:
           DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
           DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
@@ -80,41 +99,15 @@ jobs:
           DATABASE_PORT: 5432
           DATABASE_USER: user123
           DATABASE_PASSWORD: root
-          DATABASE_NAME: test
+          DATABASE_NAME: glucose_dev
         run: |
           npm run migrations:latest
-
-      - name: Run cgm-handler-container
-        env:
-          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
-          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
-          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
-          DEXCOM_USER_LOCATION: EU
-          DATABASE_HOST: postgres
-          DATABASE_USER: user123
-          DATABASE_PASSWORD: root
-          DATABASE_NAME: test
-        run: |
-          echo "Running image with tag: $COMMIT_HASH"
-          docker ps -a
-        
-          docker run --rm -d -p 9000:8080 \
-          --name cgm-handler-container \
-          -e DEXCOM_USERNAME \
-          -e DEXCOM_PASSWORD \
-          -e DEXCOM_APPLICATION_ID \
-          -e DEXCOM_USER_LOCATION \
-          -e DATABASE_HOST \
-          -e DATABASE_USER \
-          -e DATABASE_PASSWORD \
-          -e DATABASE_NAME \
-          cgm-handler:$COMMIT_HASH
 
       - name: Check if image is appropriate for Lambda Container
         run: |
           set -e
           response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}')
-          docker logs cgm-handler-container
+          docker logs cgm-handler
           echo $response
           if echo $response | grep -q "error"; then
               echo "Error found in response"
@@ -125,4 +118,4 @@ jobs:
 
       - name: Clear after pipeline
         run: |
-          docker container stop cgm-handler-container
+          docker-compose down
