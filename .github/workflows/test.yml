@@ -90,7 +90,7 @@ jobs:
           DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
           DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
           DEXCOM_USER_LOCATION: EU
-          DATABASE_HOST: postgres
+          DATABASE_HOST: localhost
           DATABASE_PORT: 5432
           DATABASE_USER: user123
           DATABASE_PASSWORD: root
