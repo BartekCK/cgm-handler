@@ -58,10 +58,7 @@ jobs:
           ./codecov
 
   test-build-run:
-
     runs-on: ubuntu-latest
-    environment: test
-
     env:
       DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
       DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
