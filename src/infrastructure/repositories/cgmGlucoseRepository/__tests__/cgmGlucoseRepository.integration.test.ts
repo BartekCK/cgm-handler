@@ -11,7 +11,10 @@ import { DbClientFactory } from '../../../database/client/dbClientFactory';
 import { EnvConfig } from '../../../envConfig/envConfig';
 import { cgmGlucoseTestFactory } from '../../../../domain/entities/cgmGlucose/__tests__/cgmGlucoseTestFactory';
 import { assertResultSuccess } from '../../../../common/__tests__/asserations';
-import { CgmGlucoseTrend } from '../../../../domain/entities/cgmGlucose/cgmGlucose';
+import {
+    CgmGlucose,
+    CgmGlucoseTrend,
+} from '../../../../domain/entities/cgmGlucose/cgmGlucose';
 import { cgmGlucoseDbEntityTestFactory } from './cgmGlucoseDbEntityTestFactory';
 
 describe('cgmGlucoseRepository', () => {
@@ -181,6 +184,22 @@ describe('cgmGlucoseRepository', () => {
                 expect(result.getData()).toEqual({
                     ids: cgmGlucoses.map((g) => g.getState().id),
                 });
+            });
+        });
+
+        describe('when try to save empty array', () => {
+            const cgmGlucoses: CgmGlucose[] = [];
+
+            let result: SaveManyResult;
+
+            beforeAll(async () => {
+                result = await cgmGlucoseRepository.saveMany(cgmGlucoses);
+            });
+
+            it('then result should be empty array ', async () => {
+                assertResultSuccess(result);
+
+                expect(result.getData().ids).toEqual([]);
             });
         });
     });

@@ -110,7 +110,10 @@ export class DexcomAuth implements IDexcomAuth {
             errorMessage: 'Something went wrong during request',
             errorType: 'INFRASTRUCTURE_ERROR',
             errorCode: 'HTTP_REQUEST_ERROR',
-            context: { ...errorInstance },
+            context: {
+                response: errorInstance.response,
+                data: errorInstance.response?.data,
+            },
         });
     }
 }

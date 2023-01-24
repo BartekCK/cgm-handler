@@ -56,32 +56,53 @@ jobs:
           chmod +x codecov
           ./codecov
 
-  build:
+  test-build-run:
     runs-on: ubuntu-latest
+    env:
+      DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+      DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+      DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+      DEXCOM_USER_LOCATION: EU
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: user123
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: glucose_dev
+
     steps:
+
       - uses: actions/checkout@v3
+
+      - name: Install all dependencies
+        run: npm ci
 
       - name: Install aws-lambda-runtime-interface-emulator
         run: |
           mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
 
-      - name: Set COMMIT_HASH environment variable
-        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-
-      - name: Build Docker image
+      - name: Build docker compose
         run: |
-          echo "Building image with tag: $COMMIT_HASH"
-          docker build -t cgm-handler:$COMMIT_HASH .
+          docker-compose up -d --build
 
-      - name: Run cgm-handler-container
+      - name: Run migrations for containerised postgres
+        env:
+          DATABASE_HOST: localhost
         run: |
-          docker run --rm -d -p 9000:8080 --name cgm-handler-container cgm-handler:$COMMIT_HASH
+          npm run migrations:latest
 
-      - name: Check if image is appropriate for Lambda Container
+      - name: Check if image is appropriate for lambda container
         run: |
-          curl -XPOST "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}'
+          set -e
+          response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"maxCount": 5}')
+          docker logs cgm-handler-container
+          echo $response
+          if echo $response | grep -q "error"; then
+              echo "Error found in response"
+              exit 1
+          else
+              echo "No errors found in response"
+          fi
 
       - name: Clear after pipeline
         run: |
-          docker container stop cgm-handler-container
+          docker-compose down
