@@ -62,6 +62,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
 
+    env:
+      DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+      DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+      DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+      DEXCOM_USER_LOCATION: EU
+      DATABASE_HOST: localhost
+      DATABASE_PORT: 5432
+      DATABASE_USER: user123
+      DATABASE_PASSWORD: root
+      DATABASE_NAME: glucose_dev
+
     steps:
 
       - uses: actions/checkout@v3
@@ -73,37 +84,17 @@ jobs:
         run: |
           mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
 
-      - name: Set COMMIT_HASH environment variable
-        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
       - name: Build docker compose
-        env:
-          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
-          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
-          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
-          DEXCOM_USER_LOCATION: EU
-          DATABASE_PORT: 5432
-          DATABASE_USER: user123
-          DATABASE_PASSWORD: root
-          DATABASE_NAME: glucose_dev
         run: |
           docker-compose up -d --build
 
       - name: Run migrations for containerised postgres
         env:
-          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
-          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
-          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
-          DEXCOM_USER_LOCATION: EU
           DATABASE_HOST: localhost
-          DATABASE_PORT: 5432
-          DATABASE_USER: user123
-          DATABASE_PASSWORD: root
-          DATABASE_NAME: glucose_dev
         run: |
           npm run migrations:latest
 
-      - name: Check if image is appropriate for Lambda Container
+      - name: Check if image is appropriate for lambda container
         run: |
           set -e
           response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}')
