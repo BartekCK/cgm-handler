@@ -20,9 +20,6 @@ export class EnvConfig implements IEnvConfig {
     private readonly props: ConfigProps;
 
     private constructor() {
-        console.log(process.env['DEXCOM_USERNAME']);
-        console.log(process.env['DEXCOM_PASSWORD'] !== '');
-
         const props = configPropsSchema.parse({
             dexcomPassword: process.env['DEXCOM_PASSWORD'],
             dexcomUsername: process.env['DEXCOM_USERNAME'],
@@ -45,7 +42,7 @@ export class EnvConfig implements IEnvConfig {
     public static async factory(): Promise<IEnvConfig> {
         if (process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'development') {
             const { config } = await import('dotenv');
-            console.log(process.cwd());
+
             config({
                 path: process.env['NODE_ENV'] === 'test' ? './.env.test' : './.env',
             });
