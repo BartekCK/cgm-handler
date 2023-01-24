@@ -101,7 +101,7 @@ jobs:
         
           docker run --rm -d -p 9000:8080 \
           --name cgm-handler-container \
-          --link postgres:postgres \
+#          --link postgres:postgres \
           -e DEXCOM_USERNAME \
           -e DEXCOM_PASSWORD \
           -e DEXCOM_APPLICATION_ID \
