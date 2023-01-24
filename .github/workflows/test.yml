@@ -25,6 +25,7 @@ jobs:
           --health-retries 5
 
     runs-on: ubuntu-latest
+    environment: test
 
     strategy:
       matrix:
@@ -70,7 +71,6 @@ jobs:
           docker build -t cgm-handler:$COMMIT_HASH .
 
       - name: Run migrations for docker image
-        environment: production
         env:
           DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
           DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
@@ -85,7 +85,6 @@ jobs:
           npm run migrations:latest
 
       - name: Run cgm-handler-container
-        environment: production
         env:
           DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
           DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
