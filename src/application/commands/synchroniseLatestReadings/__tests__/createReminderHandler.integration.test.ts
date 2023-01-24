@@ -46,7 +46,7 @@ describe('SynchroniseLatestReadingsCommandHandler', () => {
 
     const sessionId = v4();
     const minutesBefore = 1440;
-    const maxCount = 10;
+    let maxCount: number;
 
     const dexcomAuth = {
         createAuthState: jest.fn(() => ({
@@ -61,6 +61,8 @@ describe('SynchroniseLatestReadingsCommandHandler', () => {
 
     beforeAll(async () => {
         const envConfig = await EnvConfig.factory();
+
+        maxCount = envConfig.getDefaultMaxCount();
 
         const dbClientFactory = new DbClientFactory(envConfig);
 
@@ -83,6 +85,7 @@ describe('SynchroniseLatestReadingsCommandHandler', () => {
             new SynchroniseLatestReadingsCommandHandler({
                 cgmGlucoseRepository,
                 dexcomService,
+                envConfig,
             });
 
         const commandMap: Map<
