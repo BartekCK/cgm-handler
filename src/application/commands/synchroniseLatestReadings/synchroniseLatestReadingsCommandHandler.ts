@@ -18,6 +18,7 @@ import {
 } from '../../services/dexcomService/dexcomService.interface';
 import { DatabaseFailure } from '../../../common/types/databaseFailure';
 import { dexcomReadingSchema } from '../../services/dexcomService/dexcomReading.interface';
+import { IApplicationEnvConfig } from '../../config/applicationEnvConfig.interface';
 
 export class SynchroniseLatestReadingsCommandHandlerSuccess extends SuccessResult<{
     ids: CgmGlucoseId[];
@@ -33,6 +34,7 @@ export type SynchroniseLatestReadingsCommandHandlerResult =
 type Dependencies = {
     cgmGlucoseRepository: ICgmGlucoseRepository;
     dexcomService: IDexcomService;
+    envConfig: IApplicationEnvConfig;
 };
 
 export class SynchroniseLatestReadingsCommandHandler
@@ -44,10 +46,12 @@ export class SynchroniseLatestReadingsCommandHandler
 {
     private readonly cgmGlucoseRepository: ICgmGlucoseRepository;
     private readonly dexcomService: IDexcomService;
+    private readonly envConfig: IApplicationEnvConfig;
 
     constructor(dependencies: Dependencies) {
         this.cgmGlucoseRepository = dependencies.cgmGlucoseRepository;
         this.dexcomService = dependencies.dexcomService;
+        this.envConfig = dependencies.envConfig;
     }
 
     async handle(
@@ -68,7 +72,7 @@ export class SynchroniseLatestReadingsCommandHandler
         const [dexcomReadingsResult, latestCgmGlucoseResult] = await Promise.all([
             this.dexcomService.getReadings({
                 minutesBefore: 1440,
-                maxCount: maxCount || 10,
+                maxCount: maxCount || this.envConfig.getDefaultMaxCount(),
             }),
             this.cgmGlucoseRepository.getLatestReading(),
         ]);
