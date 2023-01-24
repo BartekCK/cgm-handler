@@ -73,9 +73,6 @@ export class SynchroniseLatestReadingsCommandHandler
             this.cgmGlucoseRepository.getLatestReading(),
         ]);
 
-        console.log(dexcomReadingsResult);
-        console.log(latestCgmGlucoseResult);
-
         if (dexcomReadingsResult.isFailure()) {
             return dexcomReadingsResult;
         }
