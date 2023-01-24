@@ -8,39 +8,39 @@ on:
 
 jobs:
 
-  test:
-    services:
-      postgres:
-        image: postgres
-        ports:
-          - "5432:5432"
-        env:
-          POSTGRES_USER: user123
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    runs-on: ubuntu-latest
-    environment: test
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Install all dependencies
-        run: npm ci
+#  test:
+#    services:
+#      postgres:
+#        image: postgres
+#        ports:
+#          - "5432:5432"
+#        env:
+#          POSTGRES_USER: user123
+#          POSTGRES_PASSWORD: root
+#          POSTGRES_DB: test
+#        options: >-
+#          --health-cmd pg_isready
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#
+#    runs-on: ubuntu-latest
+#    environment: test
+#
+#    strategy:
+#      matrix:
+#        node-version: [16.x]
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Use Node.js ${{ matrix.node-version }}
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: ${{ matrix.node-version }}
+#          cache: 'npm'
+#
+#      - name: Install all dependencies
+#        run: npm ci
 
 #      - name: Check typescript types
 #        run: npm run check-types
@@ -57,7 +57,7 @@ jobs:
 #          chmod +x codecov
 #          ./codecov
 
-  build:
+  build-test:
 
     runs-on: ubuntu-latest
     environment: test

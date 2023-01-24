@@ -26,7 +26,7 @@ export class EnvConfig implements IEnvConfig {
             dexcomApplicationId: process.env['DEXCOM_APPLICATION_ID'],
             dexcomUserLocation: process.env['DEXCOM_USER_LOCATION'],
             databaseHost: process.env['DATABASE_HOST'],
-            databasePort: process.env['DATABASE_PORT'],
+            databasePort: Number(process.env['DATABASE_PORT']),
             databaseUser: process.env['DATABASE_USER'],
             databasePassword: process.env['DATABASE_PASSWORD'],
             databaseName: process.env['DATABASE_NAME'],
