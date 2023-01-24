@@ -42,6 +42,7 @@ export const lambdaHandler = async (event: Record<string, unknown>) => {
         new SynchroniseLatestReadingsCommandHandler({
             cgmGlucoseRepository,
             dexcomService,
+            envConfig,
         });
     const commandMap: Map<string, ICommandHandler<ICommand, Promise<Result>>> = new Map();
     commandMap.set(
