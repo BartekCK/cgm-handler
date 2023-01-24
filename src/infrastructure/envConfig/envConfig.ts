@@ -32,7 +32,7 @@ export class EnvConfig implements IEnvConfig {
             databaseName: process.env['DATABASE_NAME'],
         });
 
-        console.log(props);
+        console.log(props.dexcomUsername);
         console.log(props.dexcomPassword !== '');
 
         this.props = props;
