@@ -94,7 +94,7 @@ jobs:
       - name: Check if image is appropriate for lambda container
         run: |
           set -e
-          response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{}')
+          response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{\"maxCount\": 5}')
           docker logs cgm-handler-container
           echo $response
           if echo $response | grep -q "error"; then

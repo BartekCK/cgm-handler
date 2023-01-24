@@ -52,6 +52,7 @@ export const lambdaHandler = async (event: Record<string, unknown>) => {
 
     const command = new SynchroniseLatestReadingsCommand({
         traceId: v4(),
+        maxCount: event?.maxCount ? Number(event?.maxCount) : undefined,
     });
 
     const handlerResult = await commandBus.execute<
