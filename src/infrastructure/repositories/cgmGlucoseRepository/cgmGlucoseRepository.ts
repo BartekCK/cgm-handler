@@ -65,6 +65,12 @@ export class CgmGlucoseRepository implements ICgmGlucoseRepository {
     }
 
     async saveMany(glucoses: CgmGlucose[]): Promise<SaveManyResult> {
+        if (!glucoses.length) {
+            return new SaveManySuccess({
+                ids: [],
+            });
+        }
+
         try {
             const dbEntities = glucoses.map((glucose) =>
                 this.cgmGlucoseDbEntityMapper.mapIntoCgmGlucoseDbEntity(glucose),
