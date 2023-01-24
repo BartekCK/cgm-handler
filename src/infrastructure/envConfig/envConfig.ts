@@ -20,6 +20,9 @@ export class EnvConfig implements IEnvConfig {
     private readonly props: ConfigProps;
 
     private constructor() {
+        console.log(process.env['DEXCOM_USERNAME']);
+        console.log(process.env['DEXCOM_PASSWORD'] !== '');
+
         const props = configPropsSchema.parse({
             dexcomPassword: process.env['DEXCOM_PASSWORD'],
             dexcomUsername: process.env['DEXCOM_USERNAME'],
@@ -31,9 +34,6 @@ export class EnvConfig implements IEnvConfig {
             databasePassword: process.env['DATABASE_PASSWORD'],
             databaseName: process.env['DATABASE_NAME'],
         });
-
-        console.log(props.dexcomUsername);
-        console.log(props.dexcomPassword !== '');
 
         this.props = props;
     }
