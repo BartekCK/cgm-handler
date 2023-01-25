@@ -43,5 +43,19 @@ jobs:
           docker build -t cgm-handler:$COMMIT_HASH .
           docker tag cgm-handler:$COMMIT_HASH ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
           docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
-          
+
+      - name: Run all migrations on production database
+        env:
+          DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+          DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+          DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+          DEXCOM_USER_LOCATION: EU
+          DATABASE_HOST: ${{ secrets.DATABASE_HOST }}
+          DATABASE_PORT: ${{ secrets.DATABASE_PORT }}
+          DATABASE_USER: ${{ secrets.DATABASE_USER }}
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+        run: |
+          npm ci
+          npm run migrations:latest
     
