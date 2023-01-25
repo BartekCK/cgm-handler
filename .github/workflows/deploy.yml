@@ -34,9 +34,6 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Install all dependencies
-        run: npm ci
-
       - name: Set COMMIT_HASH environment variable
         run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
@@ -44,7 +41,7 @@ jobs:
         run: |
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
           docker build -t cgm-handler:$COMMIT_HASH .
-          docker tag cgm-handler:$COMMIT_HASH ${{ env.AWS_DEFAULT_REGION }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
+          docker tag cgm-handler:$COMMIT_HASH ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
           docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
           
     
