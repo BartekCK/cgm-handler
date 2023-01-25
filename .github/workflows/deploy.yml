@@ -1,0 +1,40 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [ "develop", "master" ] #TODO: Change in to relase
+  pull_request:
+    branches: [ "develop", "master" ]
+
+jobs:
+
+  test:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install all dependencies
+        run: npm ci
+
+      - name: Set COMMIT_HASH environment variable
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build and push image to ECR
+        run: |
+          aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
+          docker build -t cgm-handler:$COMMIT_HASH .
+          docker tag cgm-handler:$COMMIT_HASH ${{ env.AWS_DEFAULT_REGION }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
+          docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
+          
+    

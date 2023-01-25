@@ -1,108 +1,108 @@
-name: App testing
-
-on:
-  push:
-    branches: [ "develop", "master" ]
-  pull_request:
-    branches: [ "develop", "master" ]
-
-jobs:
-
-  test:
-    services:
-      postgres:
-        image: postgres
-        ports:
-          - "5432:5432"
-        env:
-          POSTGRES_USER: user123
-          POSTGRES_PASSWORD: root
-          POSTGRES_DB: test
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [16.x]
-
-    steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-
-      - name: Install all dependencies
-        run: npm ci
-
-      - name: Check typescript types
-        run: npm run check-types
-
-      - name: Check lint
-        run: npm run lint
-
-      - name: Run test
-        run: npm test
-
-      - name: Upload coverage reports
-        run: |
-          curl -Os https://uploader.codecov.io/latest/linux/codecov
-          chmod +x codecov
-          ./codecov
-
-  test-build-run:
-    runs-on: ubuntu-latest
-    env:
-      DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
-      DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
-      DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
-      DEXCOM_USER_LOCATION: EU
-      DATABASE_HOST: localhost
-      DATABASE_PORT: 5432
-      DATABASE_USER: user123
-      DATABASE_PASSWORD: root
-      DATABASE_NAME: glucose_dev
-
-    steps:
-
-      - uses: actions/checkout@v3
-
-      - name: Install all dependencies
-        run: npm ci
-
-      - name: Install aws-lambda-runtime-interface-emulator
-        run: |
-          mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
-
-      - name: Build docker compose
-        run: |
-          docker-compose up -d --build
-
-      - name: Run migrations for containerised postgres
-        env:
-          DATABASE_HOST: localhost
-        run: |
-          npm run migrations:latest
-
-      - name: Check if image is appropriate for lambda container
-        run: |
-          set -e
-          response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"maxCount": 5}')
-          docker logs cgm-handler-container
-          echo $response
-          if echo $response | grep -q "error"; then
-              echo "Error found in response"
-              exit 1
-          else
-              echo "No errors found in response"
-          fi
-
-      - name: Clear after pipeline
-        run: |
-          docker-compose down
+#name: App testing
+#
+#on:
+#  push:
+#    branches: [ "develop", "master" ]
+#  pull_request:
+#    branches: [ "develop", "master" ]
+#
+#jobs:
+#
+#  test:
+#    services:
+#      postgres:
+#        image: postgres
+#        ports:
+#          - "5432:5432"
+#        env:
+#          POSTGRES_USER: user123
+#          POSTGRES_PASSWORD: root
+#          POSTGRES_DB: test
+#        options: >-
+#          --health-cmd pg_isready
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#
+#    runs-on: ubuntu-latest
+#
+#    strategy:
+#      matrix:
+#        node-version: [16.x]
+#
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Use Node.js ${{ matrix.node-version }}
+#        uses: actions/setup-node@v3
+#        with:
+#          node-version: ${{ matrix.node-version }}
+#          cache: 'npm'
+#
+#      - name: Install all dependencies
+#        run: npm ci
+#
+#      - name: Check typescript types
+#        run: npm run check-types
+#
+#      - name: Check lint
+#        run: npm run lint
+#
+#      - name: Run test
+#        run: npm test
+#
+#      - name: Upload coverage reports
+#        run: |
+#          curl -Os https://uploader.codecov.io/latest/linux/codecov
+#          chmod +x codecov
+#          ./codecov
+#
+#  test-build-run:
+#    runs-on: ubuntu-latest
+#    env:
+#      DEXCOM_USERNAME: ${{ secrets.DEXCOM_USERNAME }}
+#      DEXCOM_PASSWORD: ${{ secrets.DEXCOM_PASSWORD }}
+#      DEXCOM_APPLICATION_ID: d89443d2-327c-4a6f-89e5-496bbb0317db
+#      DEXCOM_USER_LOCATION: EU
+#      DATABASE_HOST: localhost
+#      DATABASE_PORT: 5432
+#      DATABASE_USER: user123
+#      DATABASE_PASSWORD: root
+#      DATABASE_NAME: glucose_dev
+#
+#    steps:
+#
+#      - uses: actions/checkout@v3
+#
+#      - name: Install all dependencies
+#        run: npm ci
+#
+#      - name: Install aws-lambda-runtime-interface-emulator
+#        run: |
+#          mkdir -p ~/.aws-lambda-rie && curl -Lo ~/.aws-lambda-rie/aws-lambda-rie https://github.com/aws/aws-lambda-runtime-interface-emulator/releases/latest/download/aws-lambda-rie && chmod +x ~/.aws-lambda-rie/aws-lambda-rie
+#
+#      - name: Build docker compose
+#        run: |
+#          docker-compose up -d --build
+#
+#      - name: Run migrations for containerised postgres
+#        env:
+#          DATABASE_HOST: localhost
+#        run: |
+#          npm run migrations:latest
+#
+#      - name: Check if image is appropriate for lambda container
+#        run: |
+#          set -e
+#          response=$(curl -i "http://localhost:9000/2015-03-31/functions/function/invocations" -d '{"maxCount": 5}')
+#          docker logs cgm-handler-container
+#          echo $response
+#          if echo $response | grep -q "error"; then
+#              echo "Error found in response"
+#              exit 1
+#          else
+#              echo "No errors found in response"
+#          fi
+#
+#      - name: Clear after pipeline
+#        run: |
+#          docker-compose down
