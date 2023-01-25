@@ -72,6 +72,7 @@ jobs:
       DATABASE_USER: user123
       DATABASE_PASSWORD: root
       DATABASE_NAME: glucose_dev
+      NODE_ENV: test
 
     steps:
 
