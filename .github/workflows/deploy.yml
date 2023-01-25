@@ -8,13 +8,20 @@ on:
 
 jobs:
 
-  test:
+  deploy:
 
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
         node-version: [16.x]
+
+    env:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      ECR_REPOSITORY_NAME: cgm-handler-repository
 
     steps:
       - uses: actions/checkout@v3
