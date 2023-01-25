@@ -4,4 +4,5 @@ export interface IDbClientEnvConfig {
     getDatabaseUser: () => string;
     getDatabasePassword: () => string;
     getDatabaseName: () => string;
+    getEnvironment: () => string;
 }

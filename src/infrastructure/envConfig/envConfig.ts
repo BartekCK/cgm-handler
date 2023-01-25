@@ -12,6 +12,7 @@ const configPropsSchema = z.object({
     databaseUser: z.string().min(1),
     databasePassword: z.string().min(1),
     databaseName: z.string().min(1),
+    environment: z.string().min(1),
     defaultMaxCount: z.number().int().min(1).max(287).nullable(),
 });
 
@@ -31,6 +32,7 @@ export class EnvConfig implements IEnvConfig {
             databaseUser: process.env['DATABASE_USER'],
             databasePassword: process.env['DATABASE_PASSWORD'],
             databaseName: process.env['DATABASE_NAME'],
+            environment: process.env['NODE_ENV'],
             defaultMaxCount: process.env['DEFAULT_MAX_COUNT']
                 ? Number(process.env['DEFAULT_MAX_COUNT'])
                 : null,
@@ -89,5 +91,9 @@ export class EnvConfig implements IEnvConfig {
 
     getDefaultMaxCount(): number {
         return this.props.defaultMaxCount || 20;
+    }
+
+    getEnvironment(): string {
+        return this.props.environment;
     }
 }

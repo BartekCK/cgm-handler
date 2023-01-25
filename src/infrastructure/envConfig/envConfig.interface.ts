@@ -5,4 +5,6 @@ import { IApplicationEnvConfig } from '../../application/config/applicationEnvCo
 export interface IEnvConfig
     extends IEnvDexcomConfig,
         IDbClientEnvConfig,
-        IApplicationEnvConfig {}
+        IApplicationEnvConfig {
+    getEnvironment: () => string;
+}

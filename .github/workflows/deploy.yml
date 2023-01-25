@@ -57,5 +57,5 @@ jobs:
           DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
         run: |
           npm ci
-          npm run migrations:latest
+          NODE_ENV=production npm run migrations:latest
     
