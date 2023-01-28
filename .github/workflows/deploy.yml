@@ -1,10 +1,8 @@
 name: Build and deploy
 
 on:
-  push:
-    branches: [ "develop", "master" ] #TODO: Change in to relase
-  pull_request:
-    branches: [ "develop", "master" ]
+  release:
+    types: [ published ]
 
 jobs:
 
@@ -34,15 +32,15 @@ jobs:
           aws-secret-access-key: ${{ env.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_DEFAULT_REGION }}
 
-      - name: Set COMMIT_HASH environment variable
-        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+      - name: Set env RELEASE_VERSION by tag name
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
       - name: Build and push image to ECR
         run: |
           aws ecr get-login-password --region ${{ env.AWS_DEFAULT_REGION }} | docker login --username AWS --password-stdin ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com
-          docker build --target production -t cgm-handler:$COMMIT_HASH .
-          docker tag cgm-handler:$COMMIT_HASH ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
-          docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$COMMIT_HASH
+          docker build --target production -t cgm-handler:$RELEASE_VERSION .
+          docker tag cgm-handler:$RELEASE_VERSION ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$RELEASE_VERSION
+          docker push ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_DEFAULT_REGION }}.amazonaws.com/cgm-handler-repository:$RELEASE_VERSION
 
       - name: Run all migrations on production database
         env:
