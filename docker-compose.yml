@@ -21,8 +21,7 @@ services:
     container_name: cgm-handler-container
     build:
       context: .
-      args:
-        - NODE_ENV=production
+      target: development
     ports:
       - "9000:8080"
     environment:

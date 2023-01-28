@@ -4,12 +4,20 @@ import { EnvConfig } from './src/infrastructure/envConfig/envConfig';
 export default async () => {
     const config: IDbClientEnvConfig = await EnvConfig.factory();
 
-    const [databasePassword, databasePort, databaseHost, databaseName, databaseUser] = [
+    const [
+        databasePassword,
+        databasePort,
+        databaseHost,
+        databaseName,
+        databaseUser,
+        environment,
+    ] = [
         config.getDatabasePassword(),
         config.getDatabasePort(),
         config.getDatabaseHost(),
         config.getDatabaseName(),
         config.getDatabaseUser(),
+        config.getEnvironment(),
     ];
 
     return {
@@ -20,6 +28,7 @@ export default async () => {
             user: databaseUser,
             password: databasePassword,
             database: databaseName,
+            ssl: environment === 'production',
         },
         migrations: {
             directory: './src/infrastructure/database/migrations',
