@@ -6,14 +6,21 @@ export class DbClientFactory {
     public constructor(private readonly envDatabaseConfig: IDbClientEnvConfig) {}
 
     public createDbClient(config?: Partial<Knex.Config>): IDbClient {
-        const [databasePassword, databasePort, databaseHost, databaseName, databaseUser] =
-            [
-                this.envDatabaseConfig.getDatabasePassword(),
-                this.envDatabaseConfig.getDatabasePort(),
-                this.envDatabaseConfig.getDatabaseHost(),
-                this.envDatabaseConfig.getDatabaseName(),
-                this.envDatabaseConfig.getDatabaseUser(),
-            ];
+        const [
+            databasePassword,
+            databasePort,
+            databaseHost,
+            databaseName,
+            databaseUser,
+            environment,
+        ] = [
+            this.envDatabaseConfig.getDatabasePassword(),
+            this.envDatabaseConfig.getDatabasePort(),
+            this.envDatabaseConfig.getDatabaseHost(),
+            this.envDatabaseConfig.getDatabaseName(),
+            this.envDatabaseConfig.getDatabaseUser(),
+            this.envDatabaseConfig.getEnvironment(),
+        ];
 
         return knex({
             client: 'pg',
@@ -23,6 +30,7 @@ export class DbClientFactory {
                 user: databaseUser,
                 password: databasePassword,
                 database: databaseName,
+                ssl: environment === 'production',
             },
             ...config,
         });
