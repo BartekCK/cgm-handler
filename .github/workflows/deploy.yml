@@ -58,4 +58,7 @@ jobs:
         run: |
           npm ci
           NODE_ENV=production npm run migrations:latest
-    
+
+      - name: Trigger AWS Lambda to use new image
+        run: |
+          echo "Add implementation"
