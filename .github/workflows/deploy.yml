@@ -66,7 +66,7 @@ jobs:
       - name: Trigger AWS Lambda to use new image
         env:
 #          RELEASE_VERSION: $RELEASE_VERSION
-          RELEASE_VERSION: v1.1.0
+          RELEASE_VERSION: v1.0.1
         run: |
           curl --request POST \
           --url 'https://api.github.com/repos/BartekCK/cgm-handler-infrastructure/dispatches' \
